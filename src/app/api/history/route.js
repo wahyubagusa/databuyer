@@ -1,3 +1,4 @@
+// src/app/api/history/route.js
 export const runtime = "nodejs";
 
 import { getRowsWithIndex, deleteRowByIndex } from "../../../lib/googleSheets";
@@ -28,7 +29,7 @@ export async function DELETE(req) {
       return Response.json({ ok: false, error: "rowIndex/rowIndexes tidak valid" }, { status: 400 });
     }
 
-    // Validasi & urutkan descending untuk aman jika banyak
+    // validasi dan hapus dari terbesar → terkecil agar index tidak geser
     indexes = indexes
       .filter((n) => Number.isFinite(n) && n >= headerRows)
       .sort((a, b) => b - a);

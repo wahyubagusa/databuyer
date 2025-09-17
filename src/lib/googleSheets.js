@@ -12,12 +12,12 @@ function getAuth() {
 export async function appendRow({ spreadsheetId, sheetName, values }) {
   const auth = getAuth();
   const sheets = google.sheets({ version: "v4", auth });
-  const range = `${sheetName}!A:D`;
+  const range = `${sheetName}!A:E`;                // ⬅️ was A:D
   await sheets.spreadsheets.values.append({
     spreadsheetId,
     range,
     valueInputOption: "USER_ENTERED",
-    requestBody: { values: [values] },
+    requestBody: { values: [values] },            // [A,B,C,D,E]
   });
 }
 
@@ -33,18 +33,16 @@ export async function getLastRowNumber({ spreadsheetId, sheetName }) {
   return Number.isFinite(lastNum) ? lastNum + 1 : 1;
 }
 
-// Tetap ada (untuk keperluan lain)
+// Baca semua kolom A..E
 export async function getAllRows({ spreadsheetId, sheetName }) {
   const auth = getAuth();
   const sheets = google.sheets({ version: "v4", auth });
-  const range = `${sheetName}!A:D`;
+  const range = `${sheetName}!A:E`;                // ⬅️ was A:D
   const res = await sheets.spreadsheets.values.get({ spreadsheetId, range });
   return res.data.values || [];
 }
 
-/** ===== Tambahan untuk History + Delete ===== **/
-
-// Kembalikan rows data + rowIndex absolut (0-based) agar bisa dihapus tepat sasaran
+/** ===== Untuk History + Delete ===== **/
 export async function getRowsWithIndex({ spreadsheetId, sheetName, headerRows = 1 }) {
   const rows = await getAllRows({ spreadsheetId, sheetName }); // termasuk header
   const data = rows.slice(headerRows);
@@ -74,12 +72,7 @@ export async function deleteRowByIndex({ spreadsheetId, sheetName, rowIndex }) {
       requests: [
         {
           deleteDimension: {
-            range: {
-              sheetId,
-              dimension: "ROWS",
-              startIndex: rowIndex,
-              endIndex: rowIndex + 1,
-            },
+            range: { sheetId, dimension: "ROWS", startIndex: rowIndex, endIndex: rowIndex + 1 },
           },
         },
       ],

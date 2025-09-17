@@ -26,9 +26,10 @@ function useToast() {
 
 export default function Page() {
   const [nama, setNama] = useState("");
-  const [antrian, setAntrian] = useState(""); // diisi otomatis
-  const [versi, setVersi] = useState("Steam");
+  const [antrian, setAntrian] = useState("");     // auto dari server (readonly)
+  const [versi, setVersi]   = useState("Steam");
   const [tanggal, setTanggal] = useState(todayWIB());
+  const [noPesanan, setNoPesanan] = useState(""); // ⬅️ NEW
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const namaRef = useRef(null);
@@ -60,19 +61,20 @@ export default function Page() {
 
     setLoading(true);
     try {
-      // kirim TANPA antrian — server yang tetapkan nomor
+      // kirim TANPA antrian — server yang menetapkan nomor
       const res = await fetch("/api/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nama, versi, tanggal }),
+        body: JSON.stringify({ nama, versi, tanggal, noPesanan }), // ⬅️ NEW
       });
       const data = await res.json();
       if (!res.ok || !data?.ok) throw new Error(data?.error || "Gagal submit");
 
       show("success", `Berhasil disimpan (Antrian #${data.antrian}).`);
 
-      // reset field input
+      // reset yang perlu
       setNama("");
+      setNoPesanan("");                               // ⬅️ NEW
       setVersi("Steam");
       setTanggal(todayWIB());
       requestAnimationFrame(() => namaRef.current?.focus());
@@ -96,9 +98,7 @@ export default function Page() {
         <Link href="/" className="back-btn">← Kembali ke Menu</Link>
 
         <h1>Input Data Order</h1>
-        <p className="subtle">
-          Catat order dengan cepat—optimized buat HP, langsung tersimpan di Google Sheet.
-        </p>
+        <p className="subtle">Catat order dengan cepat—optimized buat HP, langsung tersimpan di Google Sheet.</p>
 
         <form className="form" onSubmit={onSubmit} noValidate>
           {/* Nama */}
@@ -120,12 +120,7 @@ export default function Page() {
 
           {/* Antrian Nomor (auto & readonly) */}
           <div className="field">
-            <input
-              className="input"
-              placeholder=" "
-              value={antrian}
-              readOnly
-            />
+            <input className="input" placeholder=" " value={antrian} readOnly />
             <span className="float">Antrian Nomor</span>
           </div>
 
@@ -134,13 +129,7 @@ export default function Page() {
             <div className="label">Versi Steam/EA</div>
             <div className="segment">
               {["Steam","EA"].map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => setVersi(v)}
-                  className={v === versi ? "active" : ""}
-                  disabled={loading}
-                >
+                <button key={v} type="button" onClick={() => setVersi(v)} className={v === versi ? "active" : ""} disabled={loading}>
                   {v}
                 </button>
               ))}
@@ -149,37 +138,30 @@ export default function Page() {
 
           {/* Tanggal */}
           <div className="field date-field">
-            <input
-              type="date"
-              className="date"
-              placeholder=" "
-              value={tanggal}
-              onChange={(e) => setTanggal(e.target.value)}
-              disabled={loading}
-            />
+            <input type="date" className="date" placeholder=" " value={tanggal} onChange={(e) => setTanggal(e.target.value)} disabled={loading} />
             <span className="float">Tanggal Orderan</span>
             <span className="cal-ico" aria-hidden="true"></span>
           </div>
 
-          {/* Tombol Submit + progress bar saat submit */}
+          {/* No Pesanan */}
+          <div className="field">
+            <input className="input" placeholder=" " value={noPesanan} onChange={(e) => setNoPesanan(e.target.value)} disabled={loading} />
+            <span className="float">No Pesanan</span>
+          </div>
+
+          {/* Tombol Submit + progress bar */}
           <div>
             <button className="btn" type="submit" disabled={loading} style={{ width: "100%" }}>
               {loading ? "Memproses…" : "Submit / Proses"}
             </button>
-            {loading && (
-              <div className="progress-track">
-                <div className="progress-bar" />
-              </div>
-            )}
+            {loading && <div className="progress-track"><div className="progress-bar" /></div>}
           </div>
 
           <p className="note">
-            Header Sheet: <b>Nama</b> | <b>Antrian Nomor</b> | <b>Versi Steam/EA</b> | <b>Tanggal Orderan</b>
+            Header Sheet: <b>Nama</b> | <b>Antrian Nomor</b> | <b>Versi Steam/EA</b> | <b>Tanggal Orderan</b> | <b>No Pesanan</b>
           </p>
         </form>
       </div>
-
-      {/* Toast */}
       {Toast}
     </main>
   );

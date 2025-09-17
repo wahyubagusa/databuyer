@@ -60,6 +60,8 @@ html, body { height: 100%; margin: 0; padding: 0; }
   pointer-events:none;
 }
 .card h1 { font-size:24px; font-weight:800; margin: 4px 0 6px; }
+/* Card lebih lebar khusus halaman yang butuh tabel */
+.card.card-wide { max-width: 920px; }
 .subtle { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
 
 /* ===== Form & fields ===== */
@@ -269,13 +271,15 @@ select option { background-color:#1a1a24; color:#fff; }
 }
 .table {
   width: 100%;
+  table-layout: fixed;   /* pakai width dari <th> */
   border-collapse: collapse;
   font-size: 14px;
 }
 .table th, .table td {
-  padding: 8px 10px;
-  border: 1px solid var(--border);
+  padding: 8px 12px;
+  white-space: nowrap;   /* biar rapi, bisa diganti normal kalau mau wrap */
   text-align: left;
+  .nowrap { white-space: nowrap; }
 }
 .table th {
   background: rgba(255,255,255,.06);
