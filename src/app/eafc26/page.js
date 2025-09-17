@@ -1,7 +1,6 @@
-"use client";  // HARUS baris pertama
-
+"use client";
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link"; // untuk tombol Back
+import Link from "next/link";
 
 function todayWIB() {
   const now = new Date();
@@ -9,40 +8,47 @@ function todayWIB() {
   return wib.toISOString().slice(0, 10);
 }
 
-export default function Page() {
-  const [nama, setNama] = useState("");
-  const [antrian, setAntrian] = useState("");          // diisi otomatis
-  const [versi, setVersi] = useState("Steam");
-  const [tanggal, setTanggal] = useState(todayWIB());
-  const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState(null);
-  const [errors, setErrors] = useState({});
-  const namaRef = useRef(null);
-
-  // auto-hide toast
+/* ---------- Toast ringan ---------- */
+function useToast() {
+  const [toast, setToast] = useState(null); // {type:'success'|'error', text}
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(null), 2200);
     return () => clearTimeout(t);
   }, [toast]);
+  const el = toast ? (
+    <div className={`toast ${toast.type === "error" ? "error" : ""}`}>
+      {toast.text}
+    </div>
+  ) : null;
+  return { show: (type, text) => setToast({ type, text }), el };
+}
 
-  // 🚀 Ambil nomor antrian saat halaman dibuka
+export default function Page() {
+  const [nama, setNama] = useState("");
+  const [antrian, setAntrian] = useState(""); // diisi otomatis
+  const [versi, setVersi] = useState("Steam");
+  const [tanggal, setTanggal] = useState(todayWIB());
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const namaRef = useRef(null);
+
+  const { show, el: Toast } = useToast();
+
+  // Ambil nomor antrian saat buka halaman
   useEffect(() => {
     (async () => {
       try {
         const res = await fetch("/api/submit", { method: "GET" });
         const data = await res.json();
         if (data?.ok && data?.next) setAntrian(String(data.next));
-      } catch {
-        // bisa diabaikan atau tampilkan toast error ringan
-      }
+      } catch {}
     })();
   }, []);
 
   function validate() {
     const e = {};
     if (!nama.trim()) e.nama = "Nama wajib diisi.";
-    // antrian tidak divalidasi karena auto & readonly
     return e;
   }
 
@@ -54,7 +60,7 @@ export default function Page() {
 
     setLoading(true);
     try {
-      // kirim TANPA antrian — server yang tentukan
+      // kirim TANPA antrian — server yang tetapkan nomor
       const res = await fetch("/api/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -63,8 +69,7 @@ export default function Page() {
       const data = await res.json();
       if (!res.ok || !data?.ok) throw new Error(data?.error || "Gagal submit");
 
-      // tampilkan nomor yang dipakai
-      setToast({ type: "success", text: `Berhasil disimpan (Antrian #${data.antrian}).` });
+      show("success", `Berhasil disimpan (Antrian #${data.antrian}).`);
 
       // reset field input
       setNama("");
@@ -72,14 +77,14 @@ export default function Page() {
       setTanggal(todayWIB());
       requestAnimationFrame(() => namaRef.current?.focus());
 
-      // ambil nomor berikutnya untuk entry selanjutnya
+      // ambil nomor berikutnya
       try {
         const r2 = await fetch("/api/submit", { method: "GET" });
         const d2 = await r2.json();
         if (d2?.ok && d2?.next) setAntrian(String(d2.next));
       } catch {}
     } catch (err) {
-      setToast({ type: "error", text: err.message });
+      show("error", err.message || "Gagal submit");
     } finally {
       setLoading(false);
     }
@@ -88,12 +93,12 @@ export default function Page() {
   return (
     <main className="shell">
       <div className="card">
-
-        {/* Tombol Back */}
         <Link href="/" className="back-btn">← Kembali ke Menu</Link>
 
         <h1>Input Data Order</h1>
-        <p className="subtle">Catat order dengan cepat—optimized buat HP, langsung tersimpan di Google Sheet.</p>
+        <p className="subtle">
+          Catat order dengan cepat—optimized buat HP, langsung tersimpan di Google Sheet.
+        </p>
 
         <form className="form" onSubmit={onSubmit} noValidate>
           {/* Nama */}
@@ -103,10 +108,11 @@ export default function Page() {
               className="input"
               placeholder=" "
               value={nama}
-              onChange={(e)=>setNama(e.target.value)}
+              onChange={(e) => setNama(e.target.value)}
               autoCapitalize="words"
               autoComplete="name"
               required
+              disabled={loading}
             />
             <span className="float">Nama</span>
             {errors.nama && <div className="alert error">{errors.nama}</div>}
@@ -127,13 +133,16 @@ export default function Page() {
           <div>
             <div className="label">Versi Steam/EA</div>
             <div className="segment">
-              {["Steam","EA"].map(v => (
+              {["Steam","EA"].map((v) => (
                 <button
                   key={v}
                   type="button"
-                  onClick={()=>setVersi(v)}
-                  className={v===versi ? "active" : ""}
-                >{v}</button>
+                  onClick={() => setVersi(v)}
+                  className={v === versi ? "active" : ""}
+                  disabled={loading}
+                >
+                  {v}
+                </button>
               ))}
             </div>
           </div>
@@ -145,27 +154,33 @@ export default function Page() {
               className="date"
               placeholder=" "
               value={tanggal}
-              onChange={(e)=>setTanggal(e.target.value)}
+              onChange={(e) => setTanggal(e.target.value)}
+              disabled={loading}
             />
             <span className="float">Tanggal Orderan</span>
             <span className="cal-ico" aria-hidden="true"></span>
           </div>
 
-          <button className="btn" type="submit" disabled={loading}>
-            {loading && <span className="spin" />} Submit / Proses
-          </button>
-        </form>
+          {/* Tombol Submit + progress bar saat submit */}
+          <div>
+            <button className="btn" type="submit" disabled={loading} style={{ width: "100%" }}>
+              {loading ? "Memproses…" : "Submit / Proses"}
+            </button>
+            {loading && (
+              <div className="progress-track">
+                <div className="progress-bar" />
+              </div>
+            )}
+          </div>
 
-        <div className="note">
-          Header Sheet: <b>Nama</b> | <b>Antrian Nomor</b> | <b>Versi Steam/EA</b> | <b>Tanggal Orderan</b>
-        </div>
+          <p className="note">
+            Header Sheet: <b>Nama</b> | <b>Antrian Nomor</b> | <b>Versi Steam/EA</b> | <b>Tanggal Orderan</b>
+          </p>
+        </form>
       </div>
 
-      {toast && (
-        <div className={`toast ${toast.type === "error" ? "error" : ""}`}>
-          {toast.text}
-        </div>
-      )}
+      {/* Toast */}
+      {Toast}
     </main>
   );
 }

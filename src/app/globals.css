@@ -121,12 +121,6 @@ html, body { height: 100%; margin: 0; padding: 0; }
 .btn:hover { filter: brightness(1.02); box-shadow: 0 8px 40px rgba(124,92,255,.15); }
 .btn:active { transform: translateY(1px); }
 .btn:disabled { opacity:.6; cursor:not-allowed; }
-.spin {
-  display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,.35);
-  border-top-color:#fff; border-radius:50%; margin-right:8px; animation:r .7s linear infinite; vertical-align:-2px;
-}
-@keyframes r { to { transform: rotate(360deg); } }
-
 /* ===== Alerts / notes ===== */
 .alert { font-size: 13px; margin-top: 4px; }
 .alert.success { color: var(--success); }
@@ -290,3 +284,88 @@ select option { background-color:#1a1a24; color:#fff; }
 .table tr:nth-child(even) td {
   background: rgba(255,255,255,.02);
 }
+/* === Progress bar halus saat loading === */
+.progress-track{
+  position: relative;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: rgba(255,255,255,.12);
+  margin-top: 6px;
+}
+.progress-bar{
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(90deg,#6ee7ff,#7c5cff);
+  animation: barSlide 1.2s linear infinite;
+}
+@keyframes barSlide{
+  0%   { transform: translateX(-60%); }
+  100% { transform: translateX(160%); }
+}
+
+/* === Skeleton shimmer (tanpa rotasi) === */
+.skel{
+  height: 12px;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,.06) 0%,
+    rgba(255,255,255,.12) 50%,
+    rgba(255,255,255,.06) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.3s linear infinite;
+}
+@keyframes shimmer{
+  0% { background-position: 200% 0; }
+  100% { background-position: 0 0; }
+}
+/* ===== Modal Konfirmasi (dark, konsisten dengan tema) ===== */
+.modal-backdrop{
+  position: fixed; inset: 0; z-index: 9999;      /* pastikan paling atas */
+  background: rgba(0,0,0,.55);                    /* gelap */
+  display: grid; place-items: center;
+  backdrop-filter: blur(2px);                      /* blur tetap */
+}
+.modal{
+  position: relative;
+  width: min(480px, 92vw);
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 12px 48px rgba(0,0,0,.45);
+  background: transparent;                         /* transparan, isi ditutup oleh ::before */
+  padding: 18px 18px 14px;
+  isolation: isolate;                               /* cegah efek blend dari elemen luar */
+}
+.modal > *{ position: relative; z-index: 1; }       /* konten di atas overlay */
+.modal::before{
+  content:"";
+  position:absolute; inset:0;
+  background: rgba(16,18,26,.96);                   /* lapisan solid (tidak tembus) */
+  backdrop-filter: saturate(120%) blur(0.5px);      /* sedikit efek halus di dalam */
+  z-index: 0;
+}
+.modal h3{
+  margin: 0 0 6px 0; font-size: 18px; font-weight: 700;
+}
+.modal-desc{
+  margin: 0 0 14px 0; color: var(--muted);
+}
+.modal-actions{
+  display: flex; justify-content: flex-end; gap: 8px;
+}
+.btn.ghost{
+  background: rgba(255,255,255,.08);   /* sedikit abu-abu transparan */
+  border: 1px solid rgba(255,255,255,.15);
+  color: #fff;                         /* teks putih biar jelas */
+  transition: background .2s ease;
+}
+.btn.ghost:hover{
+  background: rgba(255,255,255,.18);   /* lebih terang saat hover */
+}
+.btn.danger{
+  background: linear-gradient(90deg, #ff6b6b, #c951ff);
+}
+.btn.danger:disabled{ opacity:.7; cursor:not-allowed; }
