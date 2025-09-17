@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function todayWIB() {
   const now = new Date();
@@ -13,11 +13,32 @@ export default function Page() {
   const [versi, setVersi] = useState("Steam");
   const [tanggal, setTanggal] = useState(todayWIB());
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState(null);
+  const [toast, setToast] = useState(null);
+  const [errors, setErrors] = useState({});
+  const antrianRef = useRef(null);
 
-  async function onSubmit(e) {
-    e.preventDefault();
-    setLoading(true); setMsg(null);
+  // auto-hide toast
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 2200);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  function validate() {
+    const e = {};
+    if (!nama.trim()) e.nama = "Nama wajib diisi.";
+    if (!antrian.trim()) e.antrian = "Nomor antrian wajib diisi.";
+    else if (!/^\d+$/.test(antrian.trim())) e.antrian = "Hanya angka.";
+    return e;
+  }
+
+  async function onSubmit(ev) {
+    ev.preventDefault();
+    const e = validate();
+    setErrors(e);
+    if (Object.keys(e).length) return;
+
+    setLoading(true);
     try {
       const res = await fetch("/api/submit", {
         method: "POST",
@@ -25,12 +46,17 @@ export default function Page() {
         body: JSON.stringify({ nama, antrian, versi, tanggal }),
       });
       const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "Gagal submit");
+      if (!res.ok || !data?.ok) throw new Error(data?.error || "Gagal submit");
 
-      setMsg({ type: "success", text: "Berhasil disimpan ke Google Sheet." });
-      setAntrian(""); setVersi("Steam"); setTanggal(todayWIB());
+      setToast({ type: "success", text: "Berhasil disimpan ke Google Sheet." });
+      // reset ringan
+      setAntrian("");
+      setVersi("Steam");
+      setTanggal(todayWIB());
+      // focus ke antrian untuk input cepat
+      requestAnimationFrame(() => antrianRef.current?.focus());
     } catch (err) {
-      setMsg({ type: "error", text: err.message });
+      setToast({ type: "error", text: err.message });
     } finally {
       setLoading(false);
     }
@@ -40,49 +66,82 @@ export default function Page() {
     <main className="shell">
       <div className="card">
         <h1>Input Data Order</h1>
+        <p className="subtle">Catat order dengan cepat—optimized buat HP, langsung tersimpan di Google Sheet.</p>
 
-        <form className="form" onSubmit={onSubmit}>
-          <div>
-            <div className="label">Nama</div>
-            <input className="input" placeholder="Nama"
-                   value={nama} onChange={(e)=>setNama(e.target.value)} required />
+        <form className="form" onSubmit={onSubmit} noValidate>
+          {/* Nama */}
+          <div className="field">
+            <input
+              className="input"
+              placeholder=" "
+              value={nama}
+              onChange={(e)=>setNama(e.target.value)}
+              autoCapitalize="words"
+              autoComplete="name"
+              required
+            />
+            <span className="float">Nama</span>
+            {errors.nama && <div className="alert error">{errors.nama}</div>}
           </div>
 
-          <div>
-            <div className="label">Antrian Nomor</div>
-            <input className="input" placeholder="Nomor antrian" inputMode="numeric"
-                   value={antrian} onChange={(e)=>setAntrian(e.target.value)} required />
+          {/* Antrian */}
+          <div className="field">
+            <input
+              ref={antrianRef}
+              className="input"
+              placeholder=" "
+              value={antrian}
+              onChange={(e)=>setAntrian(e.target.value)}
+              inputMode="numeric"
+              pattern="[0-9]*"
+              required
+            />
+            <span className="float">Antrian Nomor</span>
+            {errors.antrian && <div className="alert error">{errors.antrian}</div>}
           </div>
 
+          {/* Versi: segmented */}
           <div>
             <div className="label">Versi Steam/EA</div>
-            <select className="select" value={versi} onChange={(e)=>setVersi(e.target.value)}>
-              <option value="Steam">Steam</option>
-              <option value="EA">EA</option>
-            </select>
+            <div className="segment">
+              {["Steam","EA"].map(v => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={()=>setVersi(v)}
+                  className={v===versi ? "active" : ""}
+                >{v}</button>
+              ))}
+            </div>
           </div>
 
-          <div>
-            <div className="label">Tanggal Orderan</div>
-            <input type="date" className="date"
-                   value={tanggal} onChange={(e)=>setTanggal(e.target.value)} />
+          {/* Tanggal */}
+          <div className="field">
+            <input
+              type="date"
+              className="date"
+              placeholder=" "
+              value={tanggal}
+              onChange={(e)=>setTanggal(e.target.value)}
+            />
+            <span className="float">Tanggal Orderan</span>
           </div>
 
           <button className="btn" type="submit" disabled={loading}>
-            {loading ? "Memproses..." : "Submit / Proses"}
+            {loading && <span className="spin" />} Submit / Proses
           </button>
-
-          {msg && (
-            <div className={`alert ${msg.type === "success" ? "success" : "error"}`}>
-              {msg.text}
-            </div>
-          )}
         </form>
 
         <div className="note">
           Header Sheet: <b>Nama</b> | <b>Antrian Nomor</b> | <b>Versi Steam/EA</b> | <b>Tanggal Orderan</b>
         </div>
       </div>
+
+      {toast && (
+        <div className={`toast ${toast.type === "error" ? "error" : ""}`}>
+          {toast.text}
+        </div>
+      )}
     </main>
   );
 }
