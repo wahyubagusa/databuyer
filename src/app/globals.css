@@ -144,8 +144,25 @@ select{
 select option{ background-color:#1a1a24; color:#fff; }
 
 /* ===== Date picker: dark + icon putih ===== */
-input[type="date"]{ color-scheme: dark; }
-input[type="date"]::-webkit-calendar-picker-indicator{
-  filter: invert(1);
+input[type="date"] {
+  color-scheme: dark;
+  position: relative;
+  z-index: 2;
+}
+
+/* Biar label tidak tabrakan */
+input[type="date"] ~ .float {
+  top: -8px; 
+  left: 10px; 
+  font-size: 11px; 
+  padding: 0 6px;
+  color: #b9bfff;
+  background: linear-gradient(180deg, transparent 40%, rgba(21,21,31,.75) 40%);
+}
+
+/* Icon calendar putih */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.6);
+  opacity: 0.9;
   cursor: pointer;
 }
