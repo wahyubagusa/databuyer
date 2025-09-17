@@ -17,6 +17,7 @@ export default function Page() {
   const [errors, setErrors] = useState({});
   const antrianRef = useRef(null);
 
+  // auto-hide toast
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(null), 2200);
@@ -79,7 +80,7 @@ export default function Page() {
             {errors.nama && <div className="alert error">{errors.nama}</div>}
           </div>
 
-          {/* Antrian */}
+          {/* Antrian Nomor */}
           <div className="field">
             <input
               ref={antrianRef}
@@ -111,7 +112,7 @@ export default function Page() {
           </div>
 
           {/* Tanggal */}
-          <div className="field">
+          <div className="field date-field">
             <input
               type="date"
               className="date"
@@ -120,6 +121,7 @@ export default function Page() {
               onChange={(e)=>setTanggal(e.target.value)}
             />
             <span className="float">Tanggal Orderan</span>
+            <span className="cal-ico" aria-hidden="true"></span>
           </div>
 
           <button className="btn" type="submit" disabled={loading}>
