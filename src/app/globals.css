@@ -268,3 +268,25 @@ select option { background-color:#1a1a24; color:#fff; }
 .menu-card.is-disabled{ opacity:.55; cursor:not-allowed; }
 .menu-card.is-disabled .menu-cta{ color:#9aa0b5; }
 .menu-cta.disabled{ color:#9aa0b5; }
+/* ---- Table ---- */
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 16px;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.table th, .table td {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+.table th {
+  background: rgba(255,255,255,.06);
+  font-weight: 700;
+}
+.table tr:nth-child(even) td {
+  background: rgba(255,255,255,.02);
+}

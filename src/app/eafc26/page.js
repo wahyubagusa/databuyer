@@ -11,13 +11,13 @@ function todayWIB() {
 
 export default function Page() {
   const [nama, setNama] = useState("");
-  const [antrian, setAntrian] = useState("");
+  const [antrian, setAntrian] = useState("");          // diisi otomatis
   const [versi, setVersi] = useState("Steam");
   const [tanggal, setTanggal] = useState(todayWIB());
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
   const [errors, setErrors] = useState({});
-  const antrianRef = useRef(null);
+  const namaRef = useRef(null);
 
   // auto-hide toast
   useEffect(() => {
@@ -26,11 +26,23 @@ export default function Page() {
     return () => clearTimeout(t);
   }, [toast]);
 
+  // 🚀 Ambil nomor antrian saat halaman dibuka
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/submit", { method: "GET" });
+        const data = await res.json();
+        if (data?.ok && data?.next) setAntrian(String(data.next));
+      } catch {
+        // bisa diabaikan atau tampilkan toast error ringan
+      }
+    })();
+  }, []);
+
   function validate() {
     const e = {};
     if (!nama.trim()) e.nama = "Nama wajib diisi.";
-    if (!antrian.trim()) e.antrian = "Nomor antrian wajib diisi.";
-    else if (!/^\d+$/.test(antrian.trim())) e.antrian = "Hanya angka.";
+    // antrian tidak divalidasi karena auto & readonly
     return e;
   }
 
@@ -42,17 +54,30 @@ export default function Page() {
 
     setLoading(true);
     try {
+      // kirim TANPA antrian — server yang tentukan
       const res = await fetch("/api/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nama, antrian, versi, tanggal }),
+        body: JSON.stringify({ nama, versi, tanggal }),
       });
       const data = await res.json();
       if (!res.ok || !data?.ok) throw new Error(data?.error || "Gagal submit");
 
-      setToast({ type: "success", text: "Berhasil disimpan ke Google Sheet." });
-      setAntrian(""); setVersi("Steam"); setTanggal(todayWIB());
-      requestAnimationFrame(() => antrianRef.current?.focus());
+      // tampilkan nomor yang dipakai
+      setToast({ type: "success", text: `Berhasil disimpan (Antrian #${data.antrian}).` });
+
+      // reset field input
+      setNama("");
+      setVersi("Steam");
+      setTanggal(todayWIB());
+      requestAnimationFrame(() => namaRef.current?.focus());
+
+      // ambil nomor berikutnya untuk entry selanjutnya
+      try {
+        const r2 = await fetch("/api/submit", { method: "GET" });
+        const d2 = await r2.json();
+        if (d2?.ok && d2?.next) setAntrian(String(d2.next));
+      } catch {}
     } catch (err) {
       setToast({ type: "error", text: err.message });
     } finally {
@@ -74,6 +99,7 @@ export default function Page() {
           {/* Nama */}
           <div className="field">
             <input
+              ref={namaRef}
               className="input"
               placeholder=" "
               value={nama}
@@ -86,20 +112,15 @@ export default function Page() {
             {errors.nama && <div className="alert error">{errors.nama}</div>}
           </div>
 
-          {/* Antrian Nomor */}
+          {/* Antrian Nomor (auto & readonly) */}
           <div className="field">
             <input
-              ref={antrianRef}
               className="input"
               placeholder=" "
               value={antrian}
-              onChange={(e)=>setAntrian(e.target.value)}
-              inputMode="numeric"
-              pattern="[0-9]*"
-              required
+              readOnly
             />
             <span className="float">Antrian Nomor</span>
-            {errors.antrian && <div className="alert error">{errors.antrian}</div>}
           </div>
 
           {/* Versi (segmented) */}

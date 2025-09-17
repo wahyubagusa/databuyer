@@ -35,6 +35,27 @@ export default function Home() {
             </span>
           </Link>
 
+          {/* 🔥 History Order */}
+          <Link href="/history" className="menu-card">
+            <div className="menu-left">
+              <span className="menu-icon">
+                {/* icon book/history */}
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+                  <path d="M6 2a2 2 0 0 0-2 2v16a1 1 0 0 0 1.447.894L12 18.118l6.553 2.776A1 1 0 0 0 20 20V4a2 2 0 0 0-2-2H6z"/>
+                </svg>
+              </span>
+              <div className="menu-text">
+                <span className="menu-title">History Order</span>
+                <span className="menu-sub">Lihat semua data order</span>
+              </div>
+            </div>
+            <span className="menu-cta">Buka
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path fill="currentColor" d="M13 5l7 7-7 7v-4H4v-6h9V5z"/>
+              </svg>
+            </span>
+          </Link>
+
           {/* Placeholder next app */}
           <div className="menu-card is-disabled" aria-disabled="true">
             <div className="menu-left">
