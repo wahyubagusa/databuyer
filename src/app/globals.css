@@ -1,75 +1,95 @@
-/* --- Upgrade kecil --- */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Kartu: gradient border subtle */
+/* ====== Global Styles ====== */
+body {
+  @apply bg-[#0f0f1a] text-white font-sans;
+  background: linear-gradient(135deg, #0f0f1a, #1b1b2b, #0f0f1a);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ====== Card Container ====== */
 .card {
-  position: relative;
-  overflow: hidden;
-}
-.card::before {
-  content: "";
-  position: absolute; inset: -1px;
-  border-radius: var(--radius);
-  padding: 1px;
-  background: linear-gradient(135deg, rgba(110,231,255,.35), rgba(124,92,255,.35));
-  -webkit-mask: 
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude;
-  pointer-events: none;
+  @apply bg-[#161622] shadow-2xl rounded-2xl p-8 max-w-md w-full;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
 }
 
-/* Subjudul kecil */
-.subtle {
-  color: var(--muted);
-  font-size: 13px;
-  margin: -6px 0 14px;
+/* ====== Typography ====== */
+h1, h2, h3, h4, h5 {
+  @apply font-bold text-white;
 }
 
-/* Floating label */
-.field { position: relative; }
-.float {
-  position: absolute; left: 12px; top: 10px;
-  font-size: 12px; color: var(--muted); transition: .15s ease;
-  pointer-events: none;
-}
-.input:not(:placeholder-shown) ~ .float,
-.input:focus ~ .float,
-.select:focus ~ .float,
-.date:focus ~ .float {
-  top: -8px; left: 10px; font-size: 11px; 
-  padding: 0 6px; color: #b9bfff;
-  background: linear-gradient(180deg, transparent 40%, rgba(21,21,31,.75) 40%);
+p, label {
+  @apply text-gray-300;
 }
 
-/* Segmented control */
-.segment {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-}
-.segment button {
-  padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border);
-  background: rgba(255,255,255,.04); color: var(--text); cursor: pointer;
-  transition: .15s ease;
-}
-.segment button.active {
-  background: linear-gradient(135deg, rgba(110,231,255,.18), rgba(124,92,255,.18));
-  border-color: #6c5cffbb;
-  box-shadow: 0 0 0 2px rgba(124,92,255,.25) inset;
+/* ====== Input Fields ====== */
+input, select, textarea {
+  @apply w-full px-4 py-2 rounded-lg border text-white;
+  background-color: #1e1e2e;
+  border: 1px solid #3b3b4f;
+  outline: none;
+  transition: border 0.3s, box-shadow 0.3s;
 }
 
-/* Tombol: glow halus saat hover */
-.btn:hover { filter: brightness(1.02); box-shadow: 0 8px 40px rgba(124,92,255,.15); }
-.btn .spin {
-  display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.35);
-  border-top-color: #fff; border-radius: 50%; margin-right: 8px; 
-  animation: r .7s linear infinite; vertical-align: -2px;
+input:focus, select:focus, textarea:focus {
+  border: 1px solid #6366f1;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
 }
-@keyframes r { to { transform: rotate(360deg); } }
 
-/* Toast */
-.toast {
-  position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
-  padding: 10px 14px; border-radius: 10px; font-size: 13px;
-  background: rgba(52, 211, 153, .9); color: #081015; 
-  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+/* ====== Dropdown (Select) Custom Style ====== */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px 16px;
+  padding-right: 40px;
 }
-.toast.error { background: rgba(248, 113, 113, .92); color: #1a0e0e; }
+
+select option {
+  background-color: #1e1e2e;
+  color: #fff;
+}
+
+/* ====== Date Picker ====== */
+input[type="date"] {
+  color-scheme: dark;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1); /* icon jadi putih */
+  cursor: pointer;
+}
+
+/* ====== Submit Button ====== */
+button {
+  @apply w-full py-3 rounded-lg font-semibold transition-transform;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  color: white;
+  border: none;
+}
+
+button:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.5);
+}
+
+/* ====== Success & Error Messages ====== */
+.success-message {
+  @apply text-green-400 mt-3;
+}
+
+.error-message {
+  @apply text-red-400 mt-3;
+}
+
+/* ====== Footer Info (misal header sheet) ====== */
+.footer-text {
+  @apply text-sm text-gray-400 mt-4;
+}
