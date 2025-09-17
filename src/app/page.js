@@ -17,7 +17,6 @@ export default function Page() {
   const [errors, setErrors] = useState({});
   const antrianRef = useRef(null);
 
-  // auto-hide toast
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(null), 2200);
@@ -49,11 +48,7 @@ export default function Page() {
       if (!res.ok || !data?.ok) throw new Error(data?.error || "Gagal submit");
 
       setToast({ type: "success", text: "Berhasil disimpan ke Google Sheet." });
-      // reset ringan
-      setAntrian("");
-      setVersi("Steam");
-      setTanggal(todayWIB());
-      // focus ke antrian untuk input cepat
+      setAntrian(""); setVersi("Steam"); setTanggal(todayWIB());
       requestAnimationFrame(() => antrianRef.current?.focus());
     } catch (err) {
       setToast({ type: "error", text: err.message });
@@ -100,7 +95,7 @@ export default function Page() {
             {errors.antrian && <div className="alert error">{errors.antrian}</div>}
           </div>
 
-          {/* Versi: segmented */}
+          {/* Versi (segmented) */}
           <div>
             <div className="label">Versi Steam/EA</div>
             <div className="segment">
