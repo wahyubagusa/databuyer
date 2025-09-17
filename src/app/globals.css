@@ -159,4 +159,14 @@ select option { background-color:#1a1a24; color:#fff; }
   position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
   width: 18px; height: 18px; pointer-events: none; opacity: .9;
   background-repeat: no-repeat; background-size: 18px 18px;
-  background-image: url("data:image/svg+xml;utf8,<svg width='20' height='20' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg' fill='white'><path d='M7 2a1 1 0 0 0-1 1v1H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1V3a1 1 0 1 0-2 0v1H8V3a1 1 0 0 0-1-1ZM5 8h1
+  background-image: url("data:image/svg+xml;utf8,<svg width='20' height='20' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg' fill='white'><path d='M7 2a1 1 0 0 0-1 1v1H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1V3a1 1 0 1 0-2 0v1H8V3a1 1 0 0 0-1-1ZM5 8h14v10H5V8Z'/></svg>");
+}
+
+/* ===== Toast (sukses/error) ===== */
+.toast{
+  position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
+  padding: 10px 14px; border-radius: 10px; font-size: 13px;
+  background: rgba(52, 211, 153, .9); color: #081015; 
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+.toast.error { background: rgba(248, 113, 113, .92); color: #1a0e0e; }
